@@ -1,5 +1,8 @@
 import {Insect, Bee, Ant, GrowerAnt, ThrowerAnt, EaterAnt, ScubaAnt, GuardAnt} from './ants';
 
+/**
+ * Keeps track of insect locations, and location types.
+ */
 class Place {
   protected ant:Ant;
   protected guard:GuardAnt;
@@ -29,6 +32,12 @@ class Place {
 
   getBees():Bee[] { return this.bees; }
 
+  /**
+   * 
+   * @param maxDistance 
+   * @param minDistance 
+   * @returns 
+   */
   getClosestBee(maxDistance:number, minDistance:number = 0):Bee {
 		let p:Place = this;
 		for(let dist = 0; p!==undefined && dist <= maxDistance; dist++) {
@@ -40,6 +49,11 @@ class Place {
 		return undefined;
   }
 
+  /**
+   * 
+   * @param ant 
+   * @returns 
+   */
   addAnt(ant:Ant):boolean {
     if(ant instanceof GuardAnt) {
       if(this.guard === undefined){
@@ -57,6 +71,10 @@ class Place {
     return false;
   }
 
+  /**
+   * 
+   * @returns 
+   */
   removeAnt():Ant {
     if(this.guard !== undefined){
       let guard = this.guard;
@@ -70,11 +88,19 @@ class Place {
     }
   }
 
+  /**
+   * 
+   * @param bee 
+   */
   addBee(bee:Bee):void {
     this.bees.push(bee);
     bee.setPlace(this);
   }
 
+  /**
+   * 
+   * @param bee 
+   */
   removeBee(bee:Bee):void {
     var index = this.bees.indexOf(bee);
     if(index >= 0){
@@ -83,16 +109,27 @@ class Place {
     }
   }
 
+  /**
+   * 
+   */
   removeAllBees():void {
     this.bees.forEach((bee) => bee.setPlace(undefined) );
     this.bees = [];
   }
 
+  /**
+   * 
+   * @param bee 
+   */
   exitBee(bee:Bee):void {
     this.removeBee(bee);
     this.exit.addBee(bee);  
   }
 
+  /**
+   * 
+   * @param insect 
+   */
   removeInsect(insect:Insect) {
     if(insect instanceof Ant){
       this.removeAnt();
@@ -102,6 +139,9 @@ class Place {
     }
   }
 
+  /**
+   * 
+   */
   act() {
     if(this.water){
       if(this.guard){
@@ -114,7 +154,9 @@ class Place {
   }
 }
 
-
+/**
+ * 
+ */
 class Hive extends Place {
   private waves:{[index:number]:Bee[]} = {}
 
@@ -122,6 +164,12 @@ class Hive extends Place {
     super('Hive');
   }
 
+  /**
+   * 
+   * @param attackTurn 
+   * @param numBees 
+   * @returns 
+   */
   addWave(attackTurn:number, numBees:number):Hive {
     let wave:Bee[] = [];
     for(let i=0; i<numBees; i++) {
@@ -133,6 +181,12 @@ class Hive extends Place {
     return this;
   }
   
+  /**
+   * 
+   * @param colony 
+   * @param currentTurn 
+   * @returns 
+   */
   invade(colony:AntColony, currentTurn:number): Bee[]{
     if(this.waves[currentTurn] !== undefined) {
       this.waves[currentTurn].forEach((bee) => {
@@ -149,7 +203,9 @@ class Hive extends Place {
   }
 }
 
-
+/**
+ * 
+ */
 class AntColony {
   private food:number;
   private places:Place[][] = [];
@@ -196,6 +252,10 @@ class AntColony {
 
   getBoosts():{[index:string]:number} { return this.boosts; }
 
+  /**
+   * 
+   * @param boost 
+   */
   addBoost(boost:string){
     if(this.boosts[boost] === undefined){
       this.boosts[boost] = 0;
@@ -204,6 +264,12 @@ class AntColony {
     console.log('Found a '+boost+'!');
   }
 
+  /**
+   * 
+   * @param ant 
+   * @param place 
+   * @returns 
+   */
   deployAnt(ant:Ant, place:Place):string {
     if(this.food >= ant.getFoodCost()){
       let success = place.addAnt(ant);
@@ -216,10 +282,20 @@ class AntColony {
     return 'not enough food';
   }
 
+  /**
+   * Remove ant at location
+   * @param place location of ant
+   */
   removeAnt(place:Place){
     place.removeAnt();
   }
 
+  /**
+   * 
+   * @param boost 
+   * @param place 
+   * @returns 
+   */
   applyBoost(boost:string, place:Place):string {
     if(this.boosts[boost] === undefined || this.boosts[boost] < 1) {
       return 'no such boost';
@@ -232,6 +308,9 @@ class AntColony {
     return undefined;
   }
 
+  /**
+   * 
+   */
   antsAct() {
     this.getAllAnts().forEach((ant) => {
       if(ant instanceof GuardAnt) {
@@ -257,6 +336,10 @@ class AntColony {
     }    
   }
 
+  /**
+   * 
+   * @returns 
+   */
   getAllAnts():Ant[] {
     let ants = [];
     for(let i=0; i<this.places.length; i++) {
@@ -269,6 +352,10 @@ class AntColony {
     return ants;
   }
 
+  /**
+   * 
+   * @returns 
+   */
   getAllBees():Bee[] {
     var bees = [];
     for(var i=0; i<this.places.length; i++){
@@ -280,11 +367,16 @@ class AntColony {
   }
 }
 
-
+/**
+ * 
+ */
 class AntGame {
   private turn:number = 0;
   constructor(private colony:AntColony, private hive:Hive){}
 
+  /**
+   * 
+   */
   takeTurn() {
     console.log('');
     this.colony.antsAct();
@@ -297,6 +389,10 @@ class AntGame {
 
   getTurn() { return this.turn; }
 
+  /**
+   * 
+   * @returns 
+   */
   gameIsWon():boolean|undefined {
     if(this.colony.queenHasBees()){
       return false;
@@ -307,6 +403,12 @@ class AntGame {
     return undefined;
   }
 
+    /**
+     * 
+     * @param antType 
+     * @param placeCoordinates 
+     * @returns 
+     */
   deployAnt(antType:string, placeCoordinates:string):string {
     let ant;
     switch(antType.toLowerCase()) {
@@ -333,6 +435,11 @@ class AntGame {
     }
   }
 
+  /**
+   * 
+   * @param placeCoordinates 
+   * @returns 
+   */
   removeAnt(placeCoordinates:string):string {
     try {
       let coords = placeCoordinates.split(',');
@@ -344,6 +451,12 @@ class AntGame {
     }    
   }
 
+  /**
+   * 
+   * @param boostType 
+   * @param placeCoordinates 
+   * @returns 
+   */
   boostAnt(boostType:string, placeCoordinates:string):string {
     try {
       let coords = placeCoordinates.split(',');

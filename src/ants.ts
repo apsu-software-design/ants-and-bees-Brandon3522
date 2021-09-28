@@ -1,5 +1,8 @@
 import {AntColony, Place} from './game';
 
+/**
+ * Abstract base class for insects
+ */
 export abstract class Insect {
   readonly name:string;
 
@@ -10,6 +13,12 @@ export abstract class Insect {
   getPlace() { return this.place; }
   setPlace(place:Place){ this.place = place; }
 
+  /**
+   * Reduces the armour of the insect by the amount specified.
+   * If the armour is less than 0, the insect is removed
+   * @param amount number to reduce armour
+   * @returns true value if the armour is less than or equal to 0, false otherwise
+   */
   reduceArmor(amount:number):boolean {
     this.armor -= amount;
     if(this.armor <= 0){
@@ -20,6 +29,10 @@ export abstract class Insect {
     return false;
   }
 
+  /**
+   * Actions to be executed
+   * @param colony an ant colony or empty parameter if none given
+   */
   abstract act(colony?:AntColony):void;
 
   toString():string {
@@ -27,7 +40,9 @@ export abstract class Insect {
   }
 }
 
-
+/**
+ * Bee insect, inherits from abstract base class Insect
+ */
 export class Bee extends Insect {
   readonly name:string = 'Bee';
   private status:string;
@@ -36,6 +51,11 @@ export class Bee extends Insect {
     super(armor, place);
   }
 
+  /**
+   * Stings ant and reduces the armour by the bee's damage
+   * @param ant Type of ant
+   * @returns boolean based on amount the ant's armour is reduced
+   */
   sting(ant:Ant):boolean{
     console.log(this+ ' stings '+ant+'!');
     return ant.reduceArmor(this.damage);
@@ -47,6 +67,10 @@ export class Bee extends Insect {
 
   setStatus(status:string) { this.status = status; }
 
+  /**
+   * Stings the ant if the location is blocked and not labelled cold
+   * or ???
+   */
   act() {
     if(this.isBlocked()){
       if(this.status !== 'cold') {
@@ -62,7 +86,9 @@ export class Bee extends Insect {
   }
 }
 
-
+/**
+ * Ant insect base class, inherits from abstract base class Insect
+ */
 export abstract class Ant extends Insect {
   protected boost:string;
   constructor(armor:number, private foodCost:number = 0, place?:Place) {
@@ -76,13 +102,18 @@ export abstract class Ant extends Insect {
   }
 }
 
-
+/**
+ * Grower ant type, inherits from base class Ant
+ */
 export class GrowerAnt extends Ant {
   readonly name:string = "Grower";
   constructor() {
     super(1,1)
   }
-
+  /**
+   * Increases food and/or adds boosts based on the random number 
+   * @param colony an ant colony
+   */
   act(colony:AntColony) {
     let roll = Math.random();
     if(roll < 0.6){
@@ -99,7 +130,9 @@ export class GrowerAnt extends Ant {
   }  
 }
 
-
+/**
+ * Thrower ant type, imherits from base class Ant
+ */
 export class ThrowerAnt extends Ant {
   readonly name:string = "Thrower";
   private damage:number = 1;
@@ -107,7 +140,12 @@ export class ThrowerAnt extends Ant {
   constructor() {
     super(1,4);
   }
-
+  /**
+   * Actions for thrower ant.
+   * Thrower ant throws a leaf at the target bee. If a particular boost
+   * is enabled for the ant, the boost is executed. If the bug spray boost
+   * is enabled, all insects within the tunnel are eliminated.
+   */
   act() {
     if(this.boost !== 'BugSpray'){
       let target;
@@ -143,7 +181,9 @@ export class ThrowerAnt extends Ant {
   }
 }
 
-
+/**
+ * Eater ant type, imherits from base class Ant
+ */
 export class EaterAnt extends Ant {
   readonly name:string = "Eater";
   private turnsEating:number = 0;
@@ -151,11 +191,19 @@ export class EaterAnt extends Ant {
   constructor() {
     super(2,4)
   }
-
+  /**
+   * 
+   * @returns a boolean based on if the eater ant's stomach is full
+   */
   isFull():boolean {
     return this.stomach.getBees().length > 0;
   }
-
+  /**
+   * Actions for the eater ant.
+   * If the turns eating variable is 0 and the bee is within range, the closest bee is eaten.
+   * Otherwise, if the turns eating variable is greater than 3, the bee is removed or
+   * the turns eating variable is incremented by one.
+   */
   act() {
     console.log("eating: "+this.turnsEating);
     if(this.turnsEating == 0){
@@ -177,6 +225,14 @@ export class EaterAnt extends Ant {
     }
   }  
 
+  /**
+   * Reduces the armour by the given amount. If the armour is greater than zero
+   * or less than or equal to zero, 
+   * the eater ant coughs up the eaten bee. 
+   * @param amount amount to reduce armour
+   * @returns reduceArmour boolean function or false
+   * 
+   */
   reduceArmor(amount:number):boolean {
     this.armor -= amount;
     console.log('armor reduced to: '+this.armor);
@@ -202,7 +258,9 @@ export class EaterAnt extends Ant {
   }
 }
 
-
+/**
+ * Scuba ant type, imherits from base class Ant
+ */
 export class ScubaAnt extends Ant {
   readonly name:string = "Scuba";
   private damage:number = 1;
@@ -210,7 +268,12 @@ export class ScubaAnt extends Ant {
   constructor() {
     super(1,5)
   }
-
+  /**
+   * Actions for scuba ant.
+   * Scuba ant throws a leaf at the target bee. If a particular boost
+   * is enabled for the ant, the boost is executed. If the bug spray boost
+   * is enabled, all insects within the tunnel are eliminated.
+   */
   act() {
     if(this.boost !== 'BugSpray'){
       let target;
@@ -246,7 +309,9 @@ export class ScubaAnt extends Ant {
   }
 }
 
-
+/**
+ * Guard ant type, imherits from base class Ant
+ */
 export class GuardAnt extends Ant {
   readonly name:string = "Guard";
 
