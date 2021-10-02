@@ -15,12 +15,12 @@ export abstract class Insect {
 
   /**
    * Reduces the armour of the insect by the amount specified.
-   * If the armour is less than 0, the insect is removed
    * @param amount number to reduce armour
    * @returns true value if the armour is less than or equal to 0, false otherwise
    */
   reduceArmor(amount:number):boolean {
     this.armor -= amount;
+    // If the armour is less than 0, the insect is removed.
     if(this.armor <= 0){
       console.log(this.toString()+' ran out of armor and expired');
       this.place.removeInsect(this);
@@ -52,7 +52,7 @@ export class Bee extends Insect {
   }
 
   /**
-   * Stings ant and reduces the armour by the bee's damage
+   * Stings ant and reduces the armour by the bee's damage.
    * @param ant Type of ant
    * @returns boolean based on amount the ant's armour is reduced
    */
@@ -68,15 +68,16 @@ export class Bee extends Insect {
   setStatus(status:string) { this.status = status; }
 
   /**
-   * Stings the ant if the location is blocked and not labelled cold
-   * or ???
+   * Actions for Bee
    */
   act() {
+    // Stings the ant if the location is blocked and not labelled cold
     if(this.isBlocked()){
       if(this.status !== 'cold') {
         this.sting(this.place.getAnt());
       }
     }
+    // If armour is positive, calls function to move bee, if it's not stuck.
     else if(this.armor > 0) {
       if(this.status !== 'stuck'){
         this.place.exitBee(this);
@@ -111,7 +112,7 @@ export class GrowerAnt extends Ant {
     super(1,1)
   }
   /**
-   * Increases food and/or adds boosts based on the random number 
+   * Increases food and/or adds boosts based on the random number.
    * @param colony an ant colony
    */
   act(colony:AntColony) {
@@ -142,18 +143,18 @@ export class ThrowerAnt extends Ant {
   }
   /**
    * Actions for thrower ant.
-   * Thrower ant throws a leaf at the target bee. If a particular boost
-   * is enabled for the ant, the boost is executed. If the bug spray boost
-   * is enabled, all insects within the tunnel are eliminated.
    */
   act() {
+
     if(this.boost !== 'BugSpray'){
       let target;
+      // If flyingLeaf is active, increase attack range
       if(this.boost === 'FlyingLeaf')
         target = this.place.getClosestBee(5);
       else
         target = this.place.getClosestBee(3);
-
+      // Thrower ant throws a leaf at the target bee 
+      // If a particular boost is enabled for the ant, the boost is executed
       if(target){
         console.log(this + ' throws a leaf at '+target);
         target.reduceArmor(this.damage);
@@ -169,6 +170,9 @@ export class ThrowerAnt extends Ant {
         this.boost = undefined;
       }
     }
+    /**
+     * If the bug spray boost is enabled, all insects within the tunnel are eliminated.
+     */
     else {
       console.log(this + ' sprays bug repellant everywhere!');
       let target = this.place.getClosestBee(0);
@@ -192,7 +196,7 @@ export class EaterAnt extends Ant {
     super(2,4)
   }
   /**
-   * 
+   * Checks to see if Eater ant has already eaten a bee.
    * @returns a boolean based on if the eater ant's stomach is full
    */
   isFull():boolean {
@@ -200,12 +204,10 @@ export class EaterAnt extends Ant {
   }
   /**
    * Actions for the eater ant.
-   * If the turns eating variable is 0 and the bee is within range, the closest bee is eaten.
-   * Otherwise, if the turns eating variable is greater than 3, the bee is removed or
-   * the turns eating variable is incremented by one.
    */
   act() {
     console.log("eating: "+this.turnsEating);
+    // If the turns eating variable is 0 and the bee is within range, the closest bee is eaten.
     if(this.turnsEating == 0){
       console.log("try to eat");
       let target = this.place.getClosestBee(0);
@@ -215,6 +217,10 @@ export class EaterAnt extends Ant {
         this.stomach.addBee(target);
         this.turnsEating = 1;
       }
+      /**
+       * Otherwise, if the turns eating variable is greater than 3, the bee is removed or
+       * the turns eating variable is incremented by one.
+       */
     } else {
       if(this.turnsEating > 3){
         this.stomach.removeBee(this.stomach.getBees()[0]);
@@ -226,17 +232,15 @@ export class EaterAnt extends Ant {
   }  
 
   /**
-   * Reduces the armour by the given amount. If the armour is greater than zero
-   * or less than or equal to zero, 
-   * the eater ant coughs up the eaten bee. 
+   * Reduces the armour by the given amount.
    * @param amount amount to reduce armour
    * @returns reduceArmour boolean function or false
-   * 
    */
   reduceArmor(amount:number):boolean {
     this.armor -= amount;
     console.log('armor reduced to: '+this.armor);
     if(this.armor > 0){
+      // If turns eating is 1, cough up the bee and reset to 3
       if(this.turnsEating == 1){
         let eaten = this.stomach.getBees()[0];
         this.stomach.removeBee(eaten);
@@ -245,7 +249,9 @@ export class EaterAnt extends Ant {
         this.turnsEating = 3;
       }
     }
+    // If armour is less than 0
     else if(this.armor <= 0){
+      // Turns is bewtween 1 and 2, cough up bee
       if(this.turnsEating > 0 && this.turnsEating <= 2){
         let eaten = this.stomach.getBees()[0];
         this.stomach.removeBee(eaten);
@@ -270,18 +276,20 @@ export class ScubaAnt extends Ant {
   }
   /**
    * Actions for scuba ant.
-   * Scuba ant throws a leaf at the target bee. If a particular boost
-   * is enabled for the ant, the boost is executed. If the bug spray boost
-   * is enabled, all insects within the tunnel are eliminated.
    */
   act() {
     if(this.boost !== 'BugSpray'){
       let target;
+      // If flyingLeaf is active, increase attack range
       if(this.boost === 'FlyingLeaf')
         target = this.place.getClosestBee(5);
       else
         target = this.place.getClosestBee(3);
-
+      
+      /**
+       * Scuba ant throws a leaf at the target bee. If a particular boost
+       * is enabled for the ant, the boost is executed.
+       */
       if(target){
         console.log(this + ' throws a leaf at '+target);
         target.reduceArmor(this.damage);
@@ -297,6 +305,9 @@ export class ScubaAnt extends Ant {
         this.boost = undefined;
       }
     }
+    /**
+    * If the bug spray boost is enabled, all insects within the tunnel are eliminated.
+    */ 
     else {
       console.log(this + ' sprays bug repellant everywhere!');
       let target = this.place.getClosestBee(0);

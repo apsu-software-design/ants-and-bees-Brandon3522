@@ -2,9 +2,6 @@ import * as Ants from './ants';
 import {AntColony, AntGame, Hive} from './game';
 import {play, showMapOf} from './ui';
 
-/**
- * Test documentation
- */
 
 if(process.argv[2] === '--debug'){ 
   //the scenario to debug with
